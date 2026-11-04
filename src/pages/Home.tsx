@@ -24,7 +24,9 @@ export function Home() {
     <>
       <section className="hero">
         <h1>Decisões financeiras com números na mão</h1>
-        <p>Simuladores gratuitos, sem cadastro. Tudo é calculado no seu navegador: nenhum dado sai do seu computador.</p>
+        <p>
+          Simuladores gratuitos, sem cadastro. Tudo é calculado no seu navegador: nenhum dado sai do seu computador.
+        </p>
       </section>
       <section className="tools" aria-label="Simuladores disponíveis">
         {tools.map((tool) => (

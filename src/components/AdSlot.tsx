@@ -4,7 +4,7 @@ interface AdSlotProps {
 
 // Espaço reservado para anúncios ou conteúdo patrocinado (monetização prevista,
 // não implementada). Nenhum script de terceiros é carregado.
-export function AdSlot({ format }: AdSlotProps) {
+export function AdSlot({ format }: Readonly<AdSlotProps>) {
   return (
     <aside className={`ad-slot ad-${format}`} aria-label="Espaço publicitário" data-testid="ad-slot">
       <span>Publicidade</span>

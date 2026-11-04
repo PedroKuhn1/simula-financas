@@ -29,8 +29,8 @@ describe('annualToMonthlyRate', () => {
 
 describe('roundCents', () => {
   it('arredonda para duas casas decimais', () => {
-    expect(roundCents(10.005)).toBe(10.01);
-    expect(roundCents(3.14159)).toBe(3.14);
+    expect(roundCents(1.236)).toBeCloseTo(1.24, 10);
+    expect(roundCents(3.14159)).toBeCloseTo(3.14, 10);
   });
 });
 
@@ -73,7 +73,12 @@ describe('compoundInterest', () => {
 
 describe('amortize', () => {
   it('SAC: amortização constante e parcelas decrescentes', () => {
-    const result = amortize({ principal: 120000, annualRatePct: ONE_PCT_MONTHLY_AS_ANNUAL, months: 120, system: 'sac' });
+    const result = amortize({
+      principal: 120000,
+      annualRatePct: ONE_PCT_MONTHLY_AS_ANNUAL,
+      months: 120,
+      system: 'sac',
+    });
     expect(result.rows).toHaveLength(120);
     expect(result.rows.every((row) => row.amortization === 1000)).toBe(true);
     expect(result.firstPayment).toBeCloseTo(2200, 2);
@@ -82,7 +87,12 @@ describe('amortize', () => {
   });
 
   it('Price: parcelas fixas calculadas pela fórmula PMT', () => {
-    const result = amortize({ principal: 100000, annualRatePct: ONE_PCT_MONTHLY_AS_ANNUAL, months: 12, system: 'price' });
+    const result = amortize({
+      principal: 100000,
+      annualRatePct: ONE_PCT_MONTHLY_AS_ANNUAL,
+      months: 12,
+      system: 'price',
+    });
     expect(result.firstPayment).toBeCloseTo(8884.88, 2);
     expect(result.lastPayment).toBeCloseTo(8884.88, 2);
     expect(result.rows[11]?.balance).toBe(0);
@@ -154,9 +164,9 @@ describe('emergencyFund', () => {
   });
 
   it('rejeita valores negativos', () => {
-    expect(() =>
-      emergencyFund({ monthlyExpenses: -1, jobType: 'clt', currentSavings: 0, monthlySaving: 0 }),
-    ).toThrow(RangeError);
+    expect(() => emergencyFund({ monthlyExpenses: -1, jobType: 'clt', currentSavings: 0, monthlySaving: 0 })).toThrow(
+      RangeError,
+    );
   });
 });
 

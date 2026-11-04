@@ -131,26 +131,31 @@ export function amortize(input: LoanInput): LoanResult {
 
   const rows: LoanRow[] = [];
   let balance = principal;
+  let firstPayment = 0;
+  let lastPayment = 0;
 
   for (let month = 1; month <= months; month++) {
     const interest = balance * rate;
     const amortization = input.system === 'sac' ? sacAmortization : pricePayment - interest;
     const payment = amortization + interest;
     balance = month === months ? 0 : balance - amortization;
-    rows.push({
+    const row: LoanRow = {
       month,
       payment: roundCents(payment),
       interest: roundCents(interest),
       amortization: roundCents(amortization),
       balance: roundCents(Math.max(balance, 0)),
-    });
+    };
+    rows.push(row);
+    if (month === 1) firstPayment = row.payment;
+    lastPayment = row.payment;
   }
 
   const totalPaid = rows.reduce((sum, row) => sum + row.payment, 0);
   return {
     rows,
-    firstPayment: rows[0]!.payment,
-    lastPayment: rows[rows.length - 1]!.payment,
+    firstPayment,
+    lastPayment,
     totalPaid: roundCents(totalPaid),
     totalInterest: roundCents(totalPaid - principal),
   };

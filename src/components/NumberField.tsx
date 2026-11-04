@@ -8,7 +8,7 @@ interface NumberFieldProps {
   hint?: string;
 }
 
-export function NumberField({ id, label, value, onChange, prefix, suffix, hint }: NumberFieldProps) {
+export function NumberField({ id, label, value, onChange, prefix, suffix, hint }: Readonly<NumberFieldProps>) {
   const hintId = hint ? `${id}-hint` : undefined;
   return (
     <div className="field">

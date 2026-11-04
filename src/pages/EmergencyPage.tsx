@@ -10,14 +10,18 @@ const jobOptions: { value: JobType; label: string }[] = [
   { value: 'autonomo', label: 'Autônomo / empresário' },
 ];
 
+function plural(count: number, singular: string, pluralForm: string): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
 function describeTime(months: number | null): string {
   if (months === null) return 'Defina um valor mensal para poupar';
   if (months === 0) return 'Meta atingida!';
-  if (months < 12) return `${months} ${months === 1 ? 'mês' : 'meses'}`;
-  const years = Math.floor(months / 12);
+  if (months < 12) return plural(months, 'mês', 'meses');
+  const yearText = plural(Math.floor(months / 12), 'ano', 'anos');
   const rest = months % 12;
-  const yearText = `${years} ${years === 1 ? 'ano' : 'anos'}`;
-  return rest === 0 ? yearText : `${yearText} e ${rest} ${rest === 1 ? 'mês' : 'meses'}`;
+  if (rest === 0) return yearText;
+  return `${yearText} e ${plural(rest, 'mês', 'meses')}`;
 }
 
 export function EmergencyPage() {
