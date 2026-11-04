@@ -107,8 +107,17 @@ jobs:
 
       # Cadeia de suprimentos: confere as assinaturas do registry e as atestações de
       # proveniência, garantindo que os pacotes não foram adulterados após a publicação.
+      # Depende do registry do npm para baixar chaves e atestações; falhas de rede momentâneas
+      # geram falso positivo (EMISSINGSIGNATUREKEY). Até 3 tentativas: um pacote realmente
+      # adulterado falha em todas e continua reprovando o pipeline.
       - name: Assinaturas e proveniência dos pacotes
-        run: npm audit signatures
+        run: |
+          for attempt in 1 2 3; do
+            npm audit signatures && exit 0
+            echo "::warning::Verificação de assinaturas falhou (tentativa $attempt/3)"
+            [ "$attempt" -lt 3 ] && sleep 20
+          done
+          exit 1
 
   segredos:
     name: Segurança – secret scanning (Gitleaks)
@@ -251,6 +260,9 @@ jobs:
   smoke-test:
     name: Verificação pós-deploy
     needs: deploy
+    # Sem este if, o job herdaria o "skipped" de revisao-dependencias (que só roda em PR)
+    # e nunca rodaria após um deploy feito por push na main.
+    if: ${{ !cancelled() && needs.deploy.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
