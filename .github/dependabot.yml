@@ -1,0 +1,32 @@
+# Dependabot: abre PRs de atualização. Cada PR passa pelo mesmo pipeline de CI
+# (testes, qualidade e segurança) antes de poder ser mesclado.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+    groups:
+      # Agrupa atualizações de ferramentas de desenvolvimento num único PR.
+      ferramentas-dev:
+        dependency-type: development
+        update-types: [minor, patch]
+      producao:
+        dependency-type: production
+        update-types: [minor, patch]
+
+  # Mantém atualizadas as actions fixadas por SHA nos workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: 'ci(deps)'
+    groups:
+      actions:
+        patterns: ['*']
