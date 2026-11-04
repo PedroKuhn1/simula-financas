@@ -260,6 +260,9 @@ jobs:
   smoke-test:
     name: Verificação pós-deploy
     needs: deploy
+    # Sem este if, o job herdaria o "skipped" de revisao-dependencias (que só roda em PR)
+    # e nunca rodaria após um deploy feito por push na main.
+    if: ${{ !cancelled() && needs.deploy.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
