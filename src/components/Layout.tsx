@@ -28,8 +28,7 @@ export function Layout() {
       <AdSlot format="banner" />
       <footer className="footer">
         <p>
-          Simulações com fins educativos. Os resultados são estimativas e não constituem recomendação de
-          investimento.
+          Simulações com fins educativos. Os resultados são estimativas e não constituem recomendação de investimento.
         </p>
         <p className="version">v{__APP_VERSION__}</p>
       </footer>

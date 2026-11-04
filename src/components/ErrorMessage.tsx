@@ -1,4 +1,4 @@
-export function ErrorMessage({ message }: { message: string }) {
+export function ErrorMessage({ message }: Readonly<{ message: string }>) {
   return (
     <p className="error" role="alert">
       {message}
