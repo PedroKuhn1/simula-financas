@@ -14,9 +14,10 @@ permissions:
   contents: read
 
 # Um novo push no mesmo PR cancela a execução anterior, que ficou obsoleta.
+# Na main nada é cancelado, para não interromper um deploy em andamento.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   qualidade:
@@ -199,8 +200,23 @@ jobs:
       - name: Instalar dependências (lockfile)
         run: npm ci
 
+      # O site fica em https://<usuário>.github.io/<repositório>/, por isso o caminho base.
       - name: Build de produção
         run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+
+      - name: Conteúdo do artefato
+        run: |
+          {
+            echo '### Artefato de build'
+            echo '```'
+            find dist -type f -printf '%8s  %p\n' | sort -k2
+            echo '```'
+            echo '```json'
+            cat dist/version.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publicar artefato de build
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -208,3 +224,52 @@ jobs:
           name: dist
           path: dist/
           retention-days: 14
+
+      # Empacota o MESMO dist/ no formato exigido pelo GitHub Pages: o que foi testado é o que vai ao ar.
+      - name: Preparar artefato do GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist/
+
+  deploy:
+    name: Deploy (GitHub Pages)
+    needs: build
+    outputs:
+      page_url: ${{ steps.deploy.outputs.page_url }}
+    # Só publica a partir da main; PRs param no build.
+    if: ${{ !cancelled() && needs.build.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Um deploy por vez; um deploy em andamento nunca é cancelado.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      # Publicar no Pages e autenticar via OIDC: nenhum token ou senha é armazenado.
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  smoke-test:
+    name: Verificação pós-deploy
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Confirma que o site responde, que o bundle carrega e que a versão no ar é a deste commit.
+      - name: Smoke test da aplicação publicada
+        # A URL passa por variável de ambiente, nunca interpolada direto no script (evita injeção).
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        run: scripts/smoke-test.sh "$PAGE_URL" "$GITHUB_SHA"
