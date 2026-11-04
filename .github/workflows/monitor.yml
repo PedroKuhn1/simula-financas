@@ -1,0 +1,155 @@
+name: Monitoramento
+
+# CI/CD responde "esta versão pode ir ao ar?"; o monitoramento responde
+# "a versão que está no ar continua funcionando?".
+on:
+  schedule:
+    # A cada 30 minutos. O GitHub pode atrasar execuções agendadas em horários de pico.
+    - cron: '*/30 * * * *'
+  # Mudanças no próprio monitoramento são testadas no PR, contra o site publicado.
+  pull_request:
+    paths:
+      - .github/workflows/monitor.yml
+      - scripts/smoke-test.sh
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL a verificar (vazio = variável SITE_URL). Use uma URL inválida para simular uma queda.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+# Verificações não se acumulam: se uma ainda estiver rodando, a próxima espera.
+concurrency:
+  group: monitoramento
+  cancel-in-progress: false
+
+env:
+  ISSUE_LABEL: indisponibilidade
+
+jobs:
+  health-check:
+    name: Health check da aplicação publicada
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # Abrir, comentar e fechar a issue de indisponibilidade.
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Definir URL monitorada
+        id: target
+        env:
+          INPUT_URL: ${{ inputs.url }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          url="${INPUT_URL:-$SITE_URL}"
+          if [[ ! "$url" =~ ^https?://[^[:space:]]+$ ]]; then
+            echo "::error::URL ausente ou inválida. Configure a variável de repositório SITE_URL."
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # Tempo de resposta da página inicial; informativo, não reprova sozinho.
+      - name: Medir tempo de resposta
+        id: latency
+        env:
+          URL: ${{ steps.target.outputs.url }}
+        run: |
+          result="$(curl --silent --output /dev/null --location --max-time 20 \
+            --write-out '%{http_code} %{time_total}' "$URL" || echo '000 0')"
+          read -r code seconds <<< "$result"
+          ms="$(awk -v s="$seconds" 'BEGIN { printf "%d", s * 1000 }')"
+          echo "http_code=$code" >> "$GITHUB_OUTPUT"
+          echo "ms=$ms" >> "$GITHUB_OUTPUT"
+          if (( ms > 3000 )); then
+            echo "::warning::Resposta lenta: ${ms} ms"
+          fi
+
+      # Mesmo script do pós-deploy: HTTP 200, título, raiz da SPA, bundle JS e version.json,
+      # com 3 tentativas a cada 30s para não alarmar por instabilidade momentânea.
+      - name: Verificar disponibilidade
+        id: check
+        continue-on-error: true
+        env:
+          URL: ${{ steps.target.outputs.url }}
+          RETRIES: 3
+          DELAY: 30
+        run: |
+          # pipefail: sem ele o status do pipe seria o do tee (sempre 0) e a queda passaria despercebida.
+          set -o pipefail
+          scripts/smoke-test.sh "$URL" | tee check.log
+          version="$(grep -oE '"version": "[^"]+"' check.log | cut -d'"' -f4)"
+          commit="$(grep -oE '"commit": "[^"]+"' check.log | cut -d'"' -f4)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "commit=${commit:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Registrar resultado
+        if: always()
+        env:
+          URL: ${{ steps.target.outputs.url }}
+          OUTCOME: ${{ steps.check.outcome }}
+          HTTP_CODE: ${{ steps.latency.outputs.http_code }}
+          LATENCY_MS: ${{ steps.latency.outputs.ms }}
+          VERSION: ${{ steps.check.outputs.version }}
+          COMMIT: ${{ steps.check.outputs.commit }}
+        run: |
+          if [[ "$OUTCOME" == success ]]; then status='🟢 Disponível'; else status='🔴 Indisponível'; fi
+          {
+            echo "### $status"
+            echo
+            echo '| Item | Valor |'
+            echo '| --- | --- |'
+            echo "| Verificado em | $(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M:%S') (Brasília) |"
+            echo "| URL | $URL |"
+            echo "| HTTP | ${HTTP_CODE:-–} |"
+            echo "| Tempo de resposta | ${LATENCY_MS:-–} ms |"
+            echo "| Versão no ar | ${VERSION:-–} (${COMMIT:-–}) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Abrir ou atualizar issue de indisponibilidade
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.target.outputs.url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create "$ISSUE_LABEL" --color B60205 \
+            --description 'Aberta automaticamente pelo monitoramento' 2>/dev/null || true
+          existing="$(gh issue list --label "$ISSUE_LABEL" --state open --json number --jq '.[0].number')"
+          when="$(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M')"
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --body "Ainda indisponível em $when. Execução: $RUN_URL"
+          else
+            gh issue create --label "$ISSUE_LABEL" \
+              --title "🔴 Aplicação indisponível: $URL" \
+              --body "O monitoramento detectou falha em **$when** (Brasília), após 3 tentativas.
+
+          - URL: $URL
+          - Execução com o log completo: $RUN_URL
+
+          Esta issue é fechada automaticamente quando a aplicação voltar a responder."
+          fi
+
+      - name: Fechar issue após recuperação
+        if: steps.check.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          for issue in $(gh issue list --label "$ISSUE_LABEL" --state open --json number --jq '.[].number'); do
+            gh issue close "$issue" --comment "🟢 Aplicação disponível novamente em $(TZ=America/Sao_Paulo date '+%d/%m/%Y %H:%M'). Execução: $RUN_URL"
+          done
+
+      # Deixa a execução vermelha no histórico do Actions quando a aplicação está fora do ar.
+      - name: Resultado final
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "::error::Aplicação indisponível"
+          exit 1
