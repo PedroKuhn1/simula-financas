@@ -285,9 +285,12 @@ a {
   width: 100%;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
-  margin: 16px 0;
-  display: block;
+}
+
+/* A rolagem fica no contêiner: com display:block na própria tabela ela não ocupa a largura toda. */
+.table-scroll {
   overflow-x: auto;
+  margin: 16px 0;
 }
 
 .table caption {

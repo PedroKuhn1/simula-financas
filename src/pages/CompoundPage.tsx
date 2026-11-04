@@ -53,27 +53,29 @@ export function CompoundPage() {
             <ResultCard label="Total investido" value={formatBRL(outcome.result.totalInvested)} />
             <ResultCard label="Juros ganhos" value={formatBRL(outcome.result.totalInterest)} />
           </div>
-          <table className="table">
-            <caption>Evolução ano a ano</caption>
-            <thead>
-              <tr>
-                <th scope="col">Ano</th>
-                <th scope="col">Investido</th>
-                <th scope="col">Saldo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {outcome.result.timeline
-                .filter((point) => point.month > 0 && point.month % 12 === 0)
-                .map((point) => (
-                  <tr key={point.month}>
-                    <td>{point.month / 12}</td>
-                    <td>{formatBRL(point.invested)}</td>
-                    <td>{formatBRL(point.balance)}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="table">
+              <caption>Evolução ano a ano</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Ano</th>
+                  <th scope="col">Investido</th>
+                  <th scope="col">Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {outcome.result.timeline
+                  .filter((point) => point.month > 0 && point.month % 12 === 0)
+                  .map((point) => (
+                    <tr key={point.month}>
+                      <td>{point.month / 12}</td>
+                      <td>{formatBRL(point.invested)}</td>
+                      <td>{formatBRL(point.balance)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
     </section>
