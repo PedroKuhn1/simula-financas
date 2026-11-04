@@ -1,0 +1,12 @@
+# Só o necessário para o build entra no contexto (mais rápido e sem vazar arquivos locais).
+node_modules
+dist
+coverage
+reports
+.git
+.github
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore
