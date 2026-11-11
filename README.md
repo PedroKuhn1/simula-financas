@@ -8,11 +8,11 @@
 Simuladores financeiros gratuitos: juros compostos, financiamento (SAC × Price) e reserva de emergência.
 É uma SPA desenvolvida como trabalho final da disciplina de **Integração Contínua**.
 
-| Entrega | Link |
-| --- | --- |
-| Repositório | https://github.com/PedroKuhn1/simula-financas |
+| Entrega             | Link                                          |
+| ------------------- | --------------------------------------------- |
+| Repositório         | https://github.com/PedroKuhn1/simula-financas |
 | Aplicação publicada | https://pedrokuhn1.github.io/simula-financas/ |
-| Imagem Docker | `ghcr.io/pedrokuhn1/simula-financas:latest` |
+| Imagem Docker       | `ghcr.io/pedrokuhn1/simula-financas:latest`   |
 
 ---
 
@@ -50,11 +50,11 @@ Content-Security-Policy rígida.
 
 ## 3. Funcionalidades
 
-| Simulador | O que faz |
-| --- | --- |
-| **Juros compostos** | Valor inicial + aporte mensal + taxa anual + prazo. Mostra o saldo final, o total investido, o total de juros e a evolução ano a ano. |
-| **Financiamento SAC × Price** | Calcula as duas tabelas de amortização, compara a primeira e a última parcela e o total de juros, e indica qual sai mais barato. Tabela completa mês a mês. |
-| **Reserva de emergência** | Recomenda de 3 a 12 meses de despesas conforme a estabilidade da renda (servidor público, CLT ou autônomo). Mostra quanto falta, o progresso e em quanto tempo a reserva fica pronta. |
+| Simulador                     | O que faz                                                                                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Juros compostos**           | Valor inicial + aporte mensal + taxa anual + prazo. Mostra o saldo final, o total investido, o total de juros e a evolução ano a ano.                                                 |
+| **Financiamento SAC × Price** | Calcula as duas tabelas de amortização, compara a primeira e a última parcela e o total de juros, e indica qual sai mais barato. Tabela completa mês a mês.                           |
+| **Reserva de emergência**     | Recomenda de 3 a 12 meses de despesas conforme a estabilidade da renda (servidor público, CLT ou autônomo). Mostra quanto falta, o progresso e em quanto tempo a reserva fica pronta. |
 
 Outros detalhes:
 
@@ -71,16 +71,16 @@ Outros detalhes:
 
 ## 4. Tecnologias utilizadas
 
-| Área | Ferramenta | Por quê |
-| --- | --- | --- |
-| Aplicação | React 19, TypeScript 6, React Router 7 | Componentes, tipagem estrita, rotas de SPA |
-| Build | Vite 8 | Build rápido, saída estática pronta para CDN |
-| Testes | Vitest, Testing Library, jsdom, coverage-v8 | Testes unitários e de interface no mesmo runner do build |
-| Qualidade | ESLint 10 (typescript-eslint *strict*, sonarjs, react-hooks), Prettier, `tsc` | Lint com regras de tipo, complexidade cognitiva e formatação |
-| Segurança | CodeQL, Gitleaks, npm audit, `npm audit signatures`, Dependency Review, Dependabot, Grype | SAST, segredos, dependências, cadeia de suprimentos e imagem |
-| CI/CD | GitHub Actions | Pipeline, release, monitoramento |
-| Hospedagem | GitHub Pages | Gratuito, HTTPS, deploy por OIDC (sem token salvo) |
-| Container | Docker (multi-stage), nginx-unprivileged, GHCR | Imagem pequena, sem root, publicada no registry do GitHub |
+| Área       | Ferramenta                                                                                | Por quê                                                      |
+| ---------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Aplicação  | React 19, TypeScript 6, React Router 7                                                    | Componentes, tipagem estrita, rotas de SPA                   |
+| Build      | Vite 8                                                                                    | Build rápido, saída estática pronta para CDN                 |
+| Testes     | Vitest, Testing Library, jsdom, coverage-v8                                               | Testes unitários e de interface no mesmo runner do build     |
+| Qualidade  | ESLint 10 (typescript-eslint _strict_, sonarjs, react-hooks), Prettier, `tsc`             | Lint com regras de tipo, complexidade cognitiva e formatação |
+| Segurança  | CodeQL, Gitleaks, npm audit, `npm audit signatures`, Dependency Review, Dependabot, Grype | SAST, segredos, dependências, cadeia de suprimentos e imagem |
+| CI/CD      | GitHub Actions                                                                            | Pipeline, release, monitoramento                             |
+| Hospedagem | GitHub Pages                                                                              | Gratuito, HTTPS, deploy por OIDC (sem token salvo)           |
+| Container  | Docker (multi-stage), nginx-unprivileged, GHCR                                            | Imagem pequena, sem root, publicada no registry do GitHub    |
 
 ## 5. Arquitetura da aplicação
 
@@ -122,7 +122,7 @@ Pages quanto para o container nginx.
   `feature/monitoramento`, `feature/docker` e `docs/readme-v1`.
 - Toda branch volta para a `main` **por pull request**, e o PR só é mesclado com o pipeline verde. O histórico de PRs
   mostra a evolução incremental do projeto, como pede a disciplina.
-- O merge é feito com *merge commit*, para manter visível no histórico qual PR trouxe cada conjunto de commits.
+- O merge é feito com _merge commit_, para manter visível no histórico qual PR trouxe cada conjunto de commits.
 - As dependências também seguem o fluxo: o Dependabot abre PRs, e eles passam pelo mesmo pipeline. Exemplo: o
   [PR #7](https://github.com/PedroKuhn1/simula-financas/pull/7) (TypeScript 7) **foi barrado pelo CI** por
   incompatibilidade com o typescript-eslint e não entrou.
@@ -141,11 +141,11 @@ git tag v1.0.0 && git push origin v1.0.0  # dispara .github/workflows/release.ym
 O workflow de release **recusa a tag** se ela não bater com o `package.json`. Depois roda todas as validações de
 novo e publica a release com o artefato.
 
-| Versão | Marco |
-| --- | --- |
-| v0.1.0 | Simuladores (primeira versão funcional) |
+| Versão | Marco                                                        |
+| ------ | ------------------------------------------------------------ |
+| v0.1.0 | Simuladores (primeira versão funcional)                      |
 | v0.2.0 | Testes, qualidade, segurança, deploy e release automatizados |
-| v1.0.0 | Monitoramento, Docker e documentação completa |
+| v1.0.0 | Monitoramento, Docker e documentação completa                |
 
 ## 7. Pipeline CI/CD
 
@@ -171,23 +171,23 @@ flowchart LR
   DOCKER -->|só main| GHCR[Publica no GHCR]
 ```
 
-| Etapa | Job | O que faz | Bloqueia se… |
-| --- | --- | --- | --- |
+| Etapa        | Job                                    | O que faz                                                                                               | Bloqueia se…                                                                                                             |
+| ------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | Dependências | `dependencias`, `revisao-dependencias` | `npm ci` com lockfile, `npm audit`, verificação de assinaturas e, no PR, revisão das dependências novas | vulnerabilidade alta/crítica, assinatura inválida, dependência nova vulnerável (≥ moderada) ou com licença fora da lista |
-| Qualidade | `qualidade` | ESLint (`--max-warnings 0`), Prettier e checagem de tipos | qualquer erro ou aviso |
-| Testes | `testes` | Vitest com cobertura e relatório JUnit | teste falhando ou cobertura abaixo do mínimo |
-| Segurança | `segredos`, `sast` | Gitleaks no histórico inteiro e CodeQL | segredo encontrado ou alerta de segurança |
-| Build | `build` | `npm run build`, lista o conteúdo e publica o artefato | erro de compilação |
-| Deploy | `deploy` | publica no GitHub Pages (**só a `main`**) | – |
-| Verificação | `smoke-test` | `scripts/smoke-test.sh` contra a URL publicada, conferindo o **commit** no ar | site fora do ar ou versão errada |
-| Docker | `docker` | build da imagem, teste do container e Grype; publica no GHCR (**só a `main`**) | container não sobe ou CVE alta/crítica com correção |
+| Qualidade    | `qualidade`                            | ESLint (`--max-warnings 0`), Prettier e checagem de tipos                                               | qualquer erro ou aviso                                                                                                   |
+| Testes       | `testes`                               | Vitest com cobertura e relatório JUnit                                                                  | teste falhando ou cobertura abaixo do mínimo                                                                             |
+| Segurança    | `segredos`, `sast`                     | Gitleaks no histórico inteiro e CodeQL                                                                  | segredo encontrado ou alerta de segurança                                                                                |
+| Build        | `build`                                | `npm run build`, lista o conteúdo e publica o artefato                                                  | erro de compilação                                                                                                       |
+| Deploy       | `deploy`                               | publica no GitHub Pages (**só a `main`**)                                                               | –                                                                                                                        |
+| Verificação  | `smoke-test`                           | `scripts/smoke-test.sh` contra a URL publicada, conferindo o **commit** no ar                           | site fora do ar ou versão errada                                                                                         |
+| Docker       | `docker`                               | build da imagem, teste do container e Grype; publica no GHCR (**só a `main`**)                          | container não sobe ou CVE alta/crítica com correção                                                                      |
 
 **Como uma falha bloqueia o pipeline:**
 
 - o `build` e o `docker` dependem (`needs`) de **todos** os jobs de validação e só rodam com
   `if: !cancelled() && !failure()`;
 - se qualquer verificação falhar, nada é construído, publicado ou implantado;
-- no GitHub, a *ruleset* "Proteção da main" (**Settings → Rules**) exige PR e os checks Qualidade, Testes,
+- no GitHub, a _ruleset_ "Proteção da main" (**Settings → Rules**) exige PR e os checks Qualidade, Testes,
   Segurança, Build e Docker verdes. Sem isso o botão de merge fica bloqueado, e ninguém consegue fazer push direto
   na `main`.
 
@@ -212,11 +212,11 @@ npm run test:coverage  # com cobertura (o que o CI roda)
 
 **63 testes** em 5 arquivos:
 
-| Arquivo | Tipo | O que cobre |
-| --- | --- | --- |
-| `src/lib/finance.test.ts` | unitário | juros compostos, SAC, Price, taxa zero, saldo final zerado, reserva, conversão de taxa, `parseDecimal` (BR/US/inválidos), validações |
-| `src/pages/*.test.tsx` | interface | preencher o formulário como um usuário (Testing Library), conferir o resultado, mensagens de erro, botão "ver tabela completa" |
-| `src/App.test.tsx` | interface | rotas, navegação, página 404, versão no rodapé |
+| Arquivo                   | Tipo      | O que cobre                                                                                                                          |
+| ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/lib/finance.test.ts` | unitário  | juros compostos, SAC, Price, taxa zero, saldo final zerado, reserva, conversão de taxa, `parseDecimal` (BR/US/inválidos), validações |
+| `src/pages/*.test.tsx`    | interface | preencher o formulário como um usuário (Testing Library), conferir o resultado, mensagens de erro, botão "ver tabela completa"       |
+| `src/App.test.tsx`        | interface | rotas, navegação, página 404, versão no rodapé                                                                                       |
 
 Os testes de cálculo usam **valores conferidos à mão**. Por exemplo:
 
@@ -233,8 +233,8 @@ Também testam **propriedades**:
 **Cobertura atual:**
 
 | Linhas | Instruções | Funções | Ramos |
-| --- | --- | --- | --- |
-| 97,8% | 98,0% | 93,3% | 98,7% |
+| ------ | ---------- | ------- | ----- |
+| 97,8%  | 98,0%      | 93,3%   | 98,7% |
 
 **Quality gate:** o `vitest.config.ts` define mínimos de 90% para linhas, instruções e funções e 85% para ramos.
 Abaixo disso o comando sai com erro e o pipeline para.
@@ -249,14 +249,14 @@ npm run format:check  # Prettier
 npm run typecheck     # TypeScript
 ```
 
-| Ferramenta | Configuração | O que pega |
-| --- | --- | --- |
-| **ESLint + typescript-eslint** `strictTypeChecked` | `eslint.config.js` | uso inseguro de `any`, promessas não tratadas, comparações sem sentido, `!` desnecessário… Usa as informações de tipo do compilador, então é **análise estática** de verdade, não só estilo. |
-| **eslint-plugin-sonarjs** | complexidade cognitiva ≤ 10 | funções difíceis de entender, código duplicado, ternários aninhados |
-| **eslint-plugin-react-hooks** | recomendado | regras dos hooks (dependências do `useEffect`/`useMemo`) |
-| **Regras extras** | `eqeqeq`, `no-console`, `complexity ≤ 10` | `==` frouxo, `console.log` esquecido, funções grandes |
-| **Prettier** | `.prettierrc.json` | formatação única, sem discussão de estilo no PR |
-| **TypeScript** | `strict` + `noUncheckedIndexedAccess` | acesso a índice de array tratado como possivelmente `undefined` |
+| Ferramenta                                         | Configuração                              | O que pega                                                                                                                                                                                   |
+| -------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ESLint + typescript-eslint** `strictTypeChecked` | `eslint.config.js`                        | uso inseguro de `any`, promessas não tratadas, comparações sem sentido, `!` desnecessário… Usa as informações de tipo do compilador, então é **análise estática** de verdade, não só estilo. |
+| **eslint-plugin-sonarjs**                          | complexidade cognitiva ≤ 10               | funções difíceis de entender, código duplicado, ternários aninhados                                                                                                                          |
+| **eslint-plugin-react-hooks**                      | recomendado                               | regras dos hooks (dependências do `useEffect`/`useMemo`)                                                                                                                                     |
+| **Regras extras**                                  | `eqeqeq`, `no-console`, `complexity ≤ 10` | `==` frouxo, `console.log` esquecido, funções grandes                                                                                                                                        |
+| **Prettier**                                       | `.prettierrc.json`                        | formatação única, sem discussão de estilo no PR                                                                                                                                              |
+| **TypeScript**                                     | `strict` + `noUncheckedIndexedAccess`     | acesso a índice de array tratado como possivelmente `undefined`                                                                                                                              |
 
 O lint roda com `--max-warnings 0`: **aviso também reprova**. Na primeira execução as regras encontraram 31
 problemas. Todos foram corrigidos no código; nenhum foi silenciado
@@ -266,17 +266,17 @@ problemas. Todos foram corrigidos no código; nenhum foi silenciado
 
 Cada camada cobre um tipo de risco diferente:
 
-| Risco | Controle | Onde | Por que esta ferramenta |
-| --- | --- | --- | --- |
-| Biblioteca com vulnerabilidade conhecida | `npm audit --audit-level=high` | job `dependencias` | nativo do npm, usa a base do GitHub Advisory, sem conta extra |
-| Pacote adulterado no registry | `npm audit signatures` | job `dependencias` | confere as assinaturas e a proveniência dos pacotes baixados |
-| PR trazendo dependência ruim | `dependency-review-action` | job `revisao-dependencias` | olha só o **diff** do PR: barra dependência nova vulnerável (≥ moderada) ou com licença não permitida |
-| Dependências desatualizadas | Dependabot (npm, actions, docker) + alertas e correções automáticas | `.github/dependabot.yml` | abre PRs semanais agrupados, que passam pelo pipeline |
-| Falha no nosso código (XSS, injeção…) | **CodeQL** `security-extended` (SAST) | job `sast` | analisador semântico do GitHub; também analisa os **workflows** (injeção em `run:`) |
-| Senha/token commitado | **Gitleaks** (histórico completo) + secret scanning com *push protection* | job `segredos` + configuração do repo | o Gitleaks roda no CI, o push protection barra o `git push` antes de o segredo entrar |
-| Vulnerabilidade na imagem | **Grype** | job `docker` | escaneia o sistema operacional e os pacotes da imagem; reprova CVE alta/crítica que já tenha correção |
-| Action de terceiros comprometida | actions fixadas por SHA + Dependabot | todos os workflows | uma tag pode ser movida por um atacante; um SHA não |
-| Token do pipeline com poder demais | `permissions` mínimas por job | todos os workflows | se um passo for comprometido, o estrago é limitado |
+| Risco                                    | Controle                                                                  | Onde                                  | Por que esta ferramenta                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Biblioteca com vulnerabilidade conhecida | `npm audit --audit-level=high`                                            | job `dependencias`                    | nativo do npm, usa a base do GitHub Advisory, sem conta extra                                         |
+| Pacote adulterado no registry            | `npm audit signatures`                                                    | job `dependencias`                    | confere as assinaturas e a proveniência dos pacotes baixados                                          |
+| PR trazendo dependência ruim             | `dependency-review-action`                                                | job `revisao-dependencias`            | olha só o **diff** do PR: barra dependência nova vulnerável (≥ moderada) ou com licença não permitida |
+| Dependências desatualizadas              | Dependabot (npm, actions, docker) + alertas e correções automáticas       | `.github/dependabot.yml`              | abre PRs semanais agrupados, que passam pelo pipeline                                                 |
+| Falha no nosso código (XSS, injeção…)    | **CodeQL** `security-extended` (SAST)                                     | job `sast`                            | analisador semântico do GitHub; também analisa os **workflows** (injeção em `run:`)                   |
+| Senha/token commitado                    | **Gitleaks** (histórico completo) + secret scanning com _push protection_ | job `segredos` + configuração do repo | o Gitleaks roda no CI, o push protection barra o `git push` antes de o segredo entrar                 |
+| Vulnerabilidade na imagem                | **Grype**                                                                 | job `docker`                          | escaneia o sistema operacional e os pacotes da imagem; reprova CVE alta/crítica que já tenha correção |
+| Action de terceiros comprometida         | actions fixadas por SHA + Dependabot                                      | todos os workflows                    | uma tag pode ser movida por um atacante; um SHA não                                                   |
+| Token do pipeline com poder demais       | `permissions` mínimas por job                                             | todos os workflows                    | se um passo for comprometido, o estrago é limitado                                                    |
 
 **Segredos e variáveis:**
 
@@ -308,29 +308,29 @@ npm run build   # tsc -b && vite build  →  dist/
 **Como é gerado:**
 
 1. o `tsc -b` checa os tipos;
-2. o Vite compila o TypeScript/JSX, junta e minifica tudo, e põe um *hash* no nome dos arquivos. Assim o navegador
+2. o Vite compila o TypeScript/JSX, junta e minifica tudo, e põe um _hash_ no nome dos arquivos. Assim o navegador
    pode guardar cache para sempre, e cada versão nova tem nomes novos;
 3. um plugin próprio (`buildInfo` em `vite.config.ts`) grava `version.json` e uma `<meta name="app-version">` com a
    versão e o **commit** (`GITHUB_SHA`).
 
 **Conteúdo do artefato `dist/` (≈ 280 kB, 86 kB com gzip):**
 
-| Arquivo | Para quê |
-| --- | --- |
-| `index.html` | página única da SPA |
-| `assets/index-<hash>.js` | aplicação (React + código) minificada |
-| `assets/index-<hash>.css` | estilos |
-| `favicon.svg` | ícone |
-| `version.json` | `{ version, commit, builtAt }`: rastreabilidade de **qual commit está no ar** |
+| Arquivo                   | Para quê                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| `index.html`              | página única da SPA                                                           |
+| `assets/index-<hash>.js`  | aplicação (React + código) minificada                                         |
+| `assets/index-<hash>.css` | estilos                                                                       |
+| `favicon.svg`             | ícone                                                                         |
+| `version.json`            | `{ version, commit, builtAt }`: rastreabilidade de **qual commit está no ar** |
 
 **Quem produz e quem usa:**
 
-| Produzido por | Artefato | Usado por |
-| --- | --- | --- |
-| job `build` (CI) | `dist` (artefato do Actions, 30 dias) | download para inspeção |
-| job `build` (só `main`) | `github-pages` | job `deploy`, que publica **exatamente** esse arquivo, sem rebuild |
-| job `docker` | imagem `ghcr.io/pedrokuhn1/simula-financas` (`latest` e `sha-<commit>`) | `docker run` em qualquer máquina |
-| workflow `release` (tag `v*`) | `simula-financas-vX.Y.Z.zip` + `.sha256` + atestação SLSA | anexado à [release](https://github.com/PedroKuhn1/simula-financas/releases) |
+| Produzido por                 | Artefato                                                                | Usado por                                                                   |
+| ----------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| job `build` (CI)              | `dist` (artefato do Actions, 30 dias)                                   | download para inspeção                                                      |
+| job `build` (só `main`)       | `github-pages`                                                          | job `deploy`, que publica **exatamente** esse arquivo, sem rebuild          |
+| job `docker`                  | imagem `ghcr.io/pedrokuhn1/simula-financas` (`latest` e `sha-<commit>`) | `docker run` em qualquer máquina                                            |
+| workflow `release` (tag `v*`) | `simula-financas-vX.Y.Z.zip` + `.sha256` + atestação SLSA               | anexado à [release](https://github.com/PedroKuhn1/simula-financas/releases) |
 
 **"Build once, deploy the same":** o que foi testado é o que vai para o ar. Para conferir a origem de um zip de
 release:
@@ -373,17 +373,17 @@ Arquivo: [`.github/workflows/monitor.yml`](.github/workflows/monitor.yml).
 > **CI/CD** responde "esta versão pode ir ao ar?". O **monitoramento** responde "a versão que está no ar continua
 > funcionando?".
 
-| Requisito | Como foi feito |
-| --- | --- |
-| Execução periódica | `schedule: '*/30 * * * *'`, a cada 30 minutos (o GitHub pode atrasar em horários de pico) |
-| Verificar a URL | o mesmo `scripts/smoke-test.sh` do pós-deploy, com a URL na variável `SITE_URL` |
-| Conteúdo esperado | não basta HTTP 200: confere o título, a `<div id="root">`, se o bundle JS carrega e se o `version.json` é válido |
-| Novas tentativas | 3 tentativas, 30 s entre elas, para não alarmar por instabilidade momentânea |
-| Registrar resultado | resumo de cada execução com status, HTTP, **tempo de resposta**, versão e commit no ar; aviso se passar de 3 s |
-| Detectar falha | execução fica **vermelha** no Actions, e o GitHub notifica o dono do repositório por e-mail |
-| Issue automática | abre uma issue com o rótulo `indisponibilidade`; se continuar fora, comenta nela em vez de abrir outra |
-| Recuperação | quando volta, **fecha a issue sozinho** com comentário de recuperação |
-| Teste manual | `workflow_dispatch` com campo `url`: colocar uma URL errada simula uma queda |
+| Requisito           | Como foi feito                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Execução periódica  | `schedule: '*/30 * * * *'`, a cada 30 minutos (o GitHub pode atrasar em horários de pico)                        |
+| Verificar a URL     | o mesmo `scripts/smoke-test.sh` do pós-deploy, com a URL na variável `SITE_URL`                                  |
+| Conteúdo esperado   | não basta HTTP 200: confere o título, a `<div id="root">`, se o bundle JS carrega e se o `version.json` é válido |
+| Novas tentativas    | 3 tentativas, 30 s entre elas, para não alarmar por instabilidade momentânea                                     |
+| Registrar resultado | resumo de cada execução com status, HTTP, **tempo de resposta**, versão e commit no ar; aviso se passar de 3 s   |
+| Detectar falha      | execução fica **vermelha** no Actions, e o GitHub notifica o dono do repositório por e-mail                      |
+| Issue automática    | abre uma issue com o rótulo `indisponibilidade`; se continuar fora, comenta nela em vez de abrir outra           |
+| Recuperação         | quando volta, **fecha a issue sozinho** com comentário de recuperação                                            |
+| Teste manual        | `workflow_dispatch` com campo `url`: colocar uma URL errada simula uma queda                                     |
 
 **Como ele decide se está disponível:**
 
@@ -439,21 +439,21 @@ O Dependabot atualiza os digests das imagens base. Ele mantém o Node na linha *
 
 ## 15. Evidências
 
-| O quê | Evidência |
-| --- | --- |
-| Evolução incremental por PRs | [PRs #1 a #12](https://github.com/PedroKuhn1/simula-financas/pulls?q=is%3Apr+is%3Amerged+-author%3Aapp%2Fdependabot): uma etapa por PR |
-| **Pipeline barrando um PR com erro** | [PR #17](https://github.com/PedroKuhn1/simula-financas/pull/17): teste e lint quebrados de propósito, Qualidade e Testes vermelhos, **Build e Deploy não executam**; fechado sem merge |
-| Pipeline barrando dependência incompatível | [PR #7](https://github.com/PedroKuhn1/simula-financas/pull/7) do Dependabot (TypeScript 7): [execução vermelha](https://github.com/PedroKuhn1/simula-financas/actions/runs/41862965091) |
-| Pipeline completo na `main` | [Execuções do CI](https://github.com/PedroKuhn1/simula-financas/actions/workflows/ci.yml?query=branch%3Amain): Build, Deploy, Verificação pós-deploy e Docker |
-| Primeiro deploy | [execução 41908478646](https://github.com/PedroKuhn1/simula-financas/actions/runs/41908478646) |
-| Execução agendada do CI (segunda-feira) | [Execuções agendadas](https://github.com/PedroKuhn1/simula-financas/actions/workflows/ci.yml?query=event%3Aschedule) |
-| Release com artefato e atestação | [v0.2.0](https://github.com/PedroKuhn1/simula-financas/releases/tag/v0.2.0) ([execução](https://github.com/PedroKuhn1/simula-financas/actions/runs/41909472775)) e [v1.0.0](https://github.com/PedroKuhn1/simula-financas/releases/tag/v1.0.0) |
-| Monitoramento agendado | [Execuções do monitoramento](https://github.com/PedroKuhn1/simula-financas/actions/workflows/monitor.yml) (a cada 30 min) |
-| Monitoramento detectando queda | [execução vermelha 41911813399](https://github.com/PedroKuhn1/simula-financas/actions/runs/41911813399), que abriu a [issue #11](https://github.com/PedroKuhn1/simula-financas/issues/11) |
-| Monitoramento detectando recuperação | [execução verde 41912066728](https://github.com/PedroKuhn1/simula-financas/actions/runs/41912066728), que fechou a issue #11 |
-| Atualizações automáticas | [PRs do Dependabot](https://github.com/PedroKuhn1/simula-financas/pulls?q=is%3Apr+author%3Aapp%2Fdependabot) passando pelo pipeline |
-| Imagem publicada | [Pacote no GHCR](https://github.com/PedroKuhn1/simula-financas/pkgs/container/simula-financas) |
-| Aplicação no ar | https://pedrokuhn1.github.io/simula-financas/ e [`version.json`](https://pedrokuhn1.github.io/simula-financas/version.json) |
+| O quê                                      | Evidência                                                                                                                                                                                                                                      |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Evolução incremental por PRs               | [PRs #1 a #12](https://github.com/PedroKuhn1/simula-financas/pulls?q=is%3Apr+is%3Amerged+-author%3Aapp%2Fdependabot): uma etapa por PR                                                                                                         |
+| **Pipeline barrando um PR com erro**       | [PR #17](https://github.com/PedroKuhn1/simula-financas/pull/17): teste e lint quebrados de propósito, Qualidade e Testes vermelhos, **Build e Deploy não executam**; fechado sem merge                                                         |
+| Pipeline barrando dependência incompatível | [PR #7](https://github.com/PedroKuhn1/simula-financas/pull/7) do Dependabot (TypeScript 7): [execução vermelha](https://github.com/PedroKuhn1/simula-financas/actions/runs/41862965091)                                                        |
+| Pipeline completo na `main`                | [Execuções do CI](https://github.com/PedroKuhn1/simula-financas/actions/workflows/ci.yml?query=branch%3Amain): Build, Deploy, Verificação pós-deploy e Docker                                                                                  |
+| Primeiro deploy                            | [execução 41908478646](https://github.com/PedroKuhn1/simula-financas/actions/runs/41908478646)                                                                                                                                                 |
+| Execução agendada do CI (segunda-feira)    | [Execuções agendadas](https://github.com/PedroKuhn1/simula-financas/actions/workflows/ci.yml?query=event%3Aschedule)                                                                                                                           |
+| Release com artefato e atestação           | [v0.2.0](https://github.com/PedroKuhn1/simula-financas/releases/tag/v0.2.0) ([execução](https://github.com/PedroKuhn1/simula-financas/actions/runs/41909472775)) e [v1.0.0](https://github.com/PedroKuhn1/simula-financas/releases/tag/v1.0.0) |
+| Monitoramento agendado                     | [Execuções do monitoramento](https://github.com/PedroKuhn1/simula-financas/actions/workflows/monitor.yml) (a cada 30 min)                                                                                                                      |
+| Monitoramento detectando queda             | [execução vermelha 41911813399](https://github.com/PedroKuhn1/simula-financas/actions/runs/41911813399), que abriu a [issue #11](https://github.com/PedroKuhn1/simula-financas/issues/11)                                                      |
+| Monitoramento detectando recuperação       | [execução verde 41912066728](https://github.com/PedroKuhn1/simula-financas/actions/runs/41912066728), que fechou a issue #11                                                                                                                   |
+| Atualizações automáticas                   | [PRs do Dependabot](https://github.com/PedroKuhn1/simula-financas/pulls?q=is%3Apr+author%3Aapp%2Fdependabot) passando pelo pipeline                                                                                                            |
+| Imagem publicada                           | [Pacote no GHCR](https://github.com/PedroKuhn1/simula-financas/pkgs/container/simula-financas)                                                                                                                                                 |
+| Aplicação no ar                            | https://pedrokuhn1.github.io/simula-financas/ e [`version.json`](https://pedrokuhn1.github.io/simula-financas/version.json)                                                                                                                    |
 
 ---
 
