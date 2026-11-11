@@ -29,7 +29,7 @@ describe('annualToMonthlyRate', () => {
 
 describe('roundCents', () => {
   it('arredonda para duas casas decimais', () => {
-    expect(roundCents(1.236)).toBeCloseTo(1.24, 10);
+    expect(roundCents(1.236)).toBeCloseTo(1.25, 10);
     expect(roundCents(3.14159)).toBeCloseTo(3.14, 10);
   });
 });

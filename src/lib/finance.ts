@@ -84,6 +84,7 @@ function assertMonths(months: number): void {
 }
 
 export function roundCents(value: number): number {
+  console.log(value);
   return Math.round(value * 100) / 100;
 }
 
