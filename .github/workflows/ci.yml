@@ -276,3 +276,99 @@ jobs:
         env:
           PAGE_URL: ${{ needs.deploy.outputs.page_url }}
         run: scripts/smoke-test.sh "$PAGE_URL" "$GITHUB_SHA"
+
+  docker:
+    name: Docker (build, teste, varredura e publicação)
+    needs: [qualidade, testes, dependencias, segredos, sast, revisao-dependencias]
+    if: ${{ !cancelled() && !failure() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      # Publicar a imagem no GitHub Container Registry (só na main).
+      packages: write
+      # Enviar o resultado da varredura à aba Security > Code scanning.
+      security-events: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Tags: sha-<commit> sempre; latest só na main.
+      - name: Definir tags da imagem
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build da imagem
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          tags: simula-financas:ci
+          build-args: GITHUB_SHA=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # O container precisa funcionar de verdade: mesmo smoke test do deploy, com o
+      # sistema de arquivos somente leitura e o commit conferido no version.json.
+      - name: Testar o container
+        run: |
+          docker run -d --name app -p 8080:8080 --read-only --tmpfs /tmp simula-financas:ci
+          RETRIES=5 DELAY=2 scripts/smoke-test.sh http://localhost:8080/ "$GITHUB_SHA"
+          test "$(docker exec app id -u)" = 101 || { echo '::error::O container deveria rodar como não-root (UID 101)'; exit 1; }
+          curl -sI http://localhost:8080/ | grep -qi '^content-security-policy:' || { echo '::error::Cabeçalho CSP ausente'; exit 1; }
+
+      - name: Logs do container
+        if: always()
+        run: docker logs app || true
+
+      # Varredura de vulnerabilidades da imagem (pacotes do sistema e da aplicação).
+      # Reprova vulnerabilidades altas ou críticas que já tenham correção disponível.
+      - name: Varredura de vulnerabilidades (Grype)
+        id: scan
+        uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: simula-financas:ci
+          only-fixed: true
+          severity-cutoff: high
+          fail-build: true
+          output-format: sarif
+
+      - name: Enviar resultado da varredura ao GitHub
+        if: ${{ !cancelled() && steps.scan.outputs.sarif != '' }}
+        uses: github/codeql-action/upload-sarif@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: container
+
+      - name: Login no GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          # Token temporário do próprio workflow: nenhuma senha armazenada.
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Reaproveita o cache do build acima; inclui SBOM e atestação de proveniência.
+      - name: Publicar imagem
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: GITHUB_SHA=${{ github.sha }}
+          cache-from: type=gha
+          provenance: mode=max
+          sbom: true
