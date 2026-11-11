@@ -41,5 +41,10 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    ignore:
+      # Mantém o Node na mesma linha LTS do .nvmrc e do CI (22). Versões ímpares (23, 25...)
+      # não são LTS e têm vida curta; a troca de versão principal é feita manualmente.
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: 'chore(docker)'
