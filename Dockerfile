@@ -4,7 +4,7 @@
 # O Dependabot propõe as atualizações (ecossistema "docker" no .github/dependabot.yml).
 
 # ---------- Estágio 1: build ----------
-FROM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS build
+FROM node:22-alpine@sha256:5b05da3f938f1c604b24c633646d48805a6667f378cb4908438616f3cc48a0bf AS build
 WORKDIR /app
 
 # Dependências primeiro: a camada só é refeita quando o lockfile muda.
