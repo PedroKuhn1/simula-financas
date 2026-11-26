@@ -107,16 +107,20 @@ jobs:
 
       # Cadeia de suprimentos: confere as assinaturas do registry e as atestações de
       # proveniência, garantindo que os pacotes não foram adulterados após a publicação.
-      # Depende do registry do npm para baixar chaves e atestações; falhas de rede momentâneas
-      # geram falso positivo (EMISSINGSIGNATUREKEY). Até 3 tentativas: um pacote realmente
+      # Depende do registry do npm para baixar chaves e atestações; instabilidades do registry/CDN
+      # geram falso positivo (EMISSINGSIGNATUREKEY) que some minutos depois. Por isso: até 4
+      # tentativas em ~3,5 min, limpando o cache HTTP do npm entre elas. Um pacote realmente
       # adulterado falha em todas e continua reprovando o pipeline.
       - name: Assinaturas e proveniência dos pacotes
         run: |
-          for attempt in 1 2 3; do
+          for wait in 15 45 150 0; do
             npm audit signatures && exit 0
-            echo "::warning::Verificação de assinaturas falhou (tentativa $attempt/3)"
-            [ "$attempt" -lt 3 ] && sleep 20
+            [ "$wait" -eq 0 ] && break
+            echo "::warning::Verificação de assinaturas falhou; nova tentativa em ${wait}s"
+            npm cache clean --force
+            sleep "$wait"
           done
+          echo "::error::Assinaturas não verificadas após 4 tentativas"
           exit 1
 
   segredos:
@@ -308,13 +312,21 @@ jobs:
             type=sha,format=long
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
+      # A data entra como build-arg para renovar diariamente a camada do "apk upgrade"
+      # (o resto continua vindo do cache). Ver comentário no Dockerfile.
+      - name: Data para atualização dos pacotes do sistema
+        id: refresh
+        run: echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
       - name: Build da imagem
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           load: true
           tags: simula-financas:ci
-          build-args: GITHUB_SHA=${{ github.sha }}
+          build-args: |
+            GITHUB_SHA=${{ github.sha }}
+            APK_REFRESH=${{ steps.refresh.outputs.date }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -368,7 +380,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: GITHUB_SHA=${{ github.sha }}
+          build-args: |
+            GITHUB_SHA=${{ github.sha }}
+            APK_REFRESH=${{ steps.refresh.outputs.date }}
           cache-from: type=gha
           provenance: mode=max
           sbom: true
