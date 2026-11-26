@@ -141,11 +141,12 @@ git tag v1.0.0 && git push origin v1.0.0  # dispara .github/workflows/release.ym
 O workflow de release **recusa a tag** se ela não bater com o `package.json`. Depois roda todas as validações de
 novo e publica a release com o artefato.
 
-| Versão | Marco                                                        |
-| ------ | ------------------------------------------------------------ |
-| v0.1.0 | Simuladores (primeira versão funcional)                      |
-| v0.2.0 | Testes, qualidade, segurança, deploy e release automatizados |
-| v1.0.0 | Monitoramento, Docker e documentação completa                |
+| Versão | Marco                                                                     |
+| ------ | ------------------------------------------------------------------------- |
+| v0.1.0 | Simuladores (primeira versão funcional)                                   |
+| v0.2.0 | Testes, qualidade, segurança, deploy e release automatizados              |
+| v1.0.0 | Monitoramento, Docker e documentação completa                             |
+| v1.0.1 | Manutenção: CVEs novas na imagem, robustez do pipeline e do monitoramento |
 
 ## 7. Pipeline CI/CD
 
@@ -373,17 +374,17 @@ Arquivo: [`.github/workflows/monitor.yml`](.github/workflows/monitor.yml).
 > **CI/CD** responde "esta versão pode ir ao ar?". O **monitoramento** responde "a versão que está no ar continua
 > funcionando?".
 
-| Requisito           | Como foi feito                                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Execução periódica  | `schedule: '*/30 * * * *'`, a cada 30 minutos (o GitHub pode atrasar em horários de pico)                        |
-| Verificar a URL     | o mesmo `scripts/smoke-test.sh` do pós-deploy, com a URL na variável `SITE_URL`                                  |
-| Conteúdo esperado   | não basta HTTP 200: confere o título, a `<div id="root">`, se o bundle JS carrega e se o `version.json` é válido |
-| Novas tentativas    | 3 tentativas, 30 s entre elas, para não alarmar por instabilidade momentânea                                     |
-| Registrar resultado | resumo de cada execução com status, HTTP, **tempo de resposta**, versão e commit no ar; aviso se passar de 3 s   |
-| Detectar falha      | execução fica **vermelha** no Actions, e o GitHub notifica o dono do repositório por e-mail                      |
-| Issue automática    | abre uma issue com o rótulo `indisponibilidade`; se continuar fora, comenta nela em vez de abrir outra           |
-| Recuperação         | quando volta, **fecha a issue sozinho** com comentário de recuperação                                            |
-| Teste manual        | `workflow_dispatch` com campo `url`: colocar uma URL errada simula uma queda                                     |
+| Requisito           | Como foi feito                                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Execução periódica  | `schedule: '7,37 * * * *'`, a cada 30 minutos, fora dos minutos redondos (o GitHub atrasa ou descarta execuções agendadas em horários de pico) |
+| Verificar a URL     | o mesmo `scripts/smoke-test.sh` do pós-deploy, com a URL na variável `SITE_URL`                                                                |
+| Conteúdo esperado   | não basta HTTP 200: confere o título, a `<div id="root">`, se o bundle JS carrega e se o `version.json` é válido                               |
+| Novas tentativas    | 3 tentativas, 30 s entre elas, para não alarmar por instabilidade momentânea                                                                   |
+| Registrar resultado | resumo de cada execução com status, HTTP, **tempo de resposta**, versão e commit no ar; aviso se passar de 3 s                                 |
+| Detectar falha      | execução fica **vermelha** no Actions, e o GitHub notifica o dono do repositório por e-mail                                                    |
+| Issue automática    | abre uma issue com o rótulo `indisponibilidade`; se continuar fora, comenta nela em vez de abrir outra                                         |
+| Recuperação         | quando volta, **fecha a issue sozinho** com comentário de recuperação                                                                          |
+| Teste manual        | `workflow_dispatch` com campo `url`: colocar uma URL errada simula uma queda                                                                   |
 
 **Como ele decide se está disponível:**
 
@@ -434,6 +435,11 @@ O Dependabot atualiza os digests das imagens base. Ele mantém o Node na linha *
 
 - O Grype reprovou a imagem base do nginx por CVEs altas/críticas (curl, zlib, libexpat, musl). Foi corrigido com
   `apk upgrade` e a remoção do `curl`, chegando a 0 vulnerabilidades.
+- Semanas depois, a execução **agendada** do CI ficou vermelha: o Grype achou CVEs novas (OpenSSL, zlib, libxml2,
+  libxslt) que o Alpine já tinha corrigido. O `apk upgrade` não aplicava as correções porque o **cache do Docker**
+  reaproveitava o resultado antigo daquele passo. Agora o CI passa a data do dia como `APK_REFRESH`, o que renova
+  essa camada diariamente (v1.0.1). É exatamente para isso que existe a execução agendada: pegar vulnerabilidades
+  novas em código que não mudou.
 - No nginx, um `add_header` dentro de um `location` faz o bloco **deixar de herdar todos** os cabeçalhos do
   `server`. Por isso os cabeçalhos de segurança ficam num arquivo incluído em cada `location`.
 

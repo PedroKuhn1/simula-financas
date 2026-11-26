@@ -4,8 +4,9 @@ name: Monitoramento
 # "a versão que está no ar continua funcionando?".
 on:
   schedule:
-    # A cada 30 minutos. O GitHub pode atrasar execuções agendadas em horários de pico.
-    - cron: '*/30 * * * *'
+    # A cada 30 minutos, nos minutos 7 e 37. O GitHub atrasa ou descarta execuções agendadas
+    # quando está sobrecarregado, o que acontece muito nos minutos "redondos" (:00 e :30).
+    - cron: '7,37 * * * *'
   # Mudanças no próprio monitoramento são testadas no PR, contra o site publicado.
   pull_request:
     paths:

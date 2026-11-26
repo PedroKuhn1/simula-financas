@@ -30,7 +30,10 @@ LABEL org.opencontainers.image.title="SimulaFinanças" \
 # Aplica as correções de segurança publicadas depois da imagem base e remove o curl,
 # que não é usado (o healthcheck usa o wget do busybox): menos pacotes, menos superfície de ataque.
 USER root
-RUN apk upgrade --no-cache && apk del --no-cache curl
+# APK_REFRESH muda todo dia no CI (data atual). Sem isso o cache do Docker reaproveitaria
+# para sempre o resultado antigo deste RUN e as correções novas do Alpine nunca entrariam.
+ARG APK_REFRESH=local
+RUN echo "apk refresh: ${APK_REFRESH}" && apk upgrade --no-cache && apk del --no-cache curl
 
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/security-headers.conf /etc/nginx/snippets/security-headers.conf
